@@ -22,8 +22,6 @@ export function GitHubSection() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
 
-  const EXCLUDED_REPOS = useMemo(() => new Set(["portfolio", "rohit-portfolio"]), []);
-
   useEffect(() => {
     async function loadRepos() {
       try {
@@ -32,11 +30,7 @@ export function GitHubSection() {
         if (res.ok) {
           const json = await res.json();
           if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-            setRepos(
-              json.data.filter(
-                (repo: GitHubRepo) => !EXCLUDED_REPOS.has(repo.name.toLowerCase())
-              )
-            );
+            setRepos(json.data);
             return;
           }
         }
@@ -48,24 +42,20 @@ export function GitHubSection() {
     }
 
     loadRepos();
-  }, [EXCLUDED_REPOS]);
+  }, []);
 
   // Filter languages
   const availableLanguages = useMemo(() => {
     const langs = new Set<string>();
-    repos
-      .filter((r) => !EXCLUDED_REPOS.has(r.name.toLowerCase()))
-      .forEach((r) => {
-        if (r.language) langs.add(r.language);
-      });
+    repos.forEach((r) => {
+      if (r.language) langs.add(r.language);
+    });
     return ["All", ...Array.from(langs)];
-  }, [repos, EXCLUDED_REPOS]);
+  }, [repos]);
 
   // Filter repos based on search and language
   const filteredRepos = useMemo(() => {
     return repos.filter((repo) => {
-      if (EXCLUDED_REPOS.has(repo.name.toLowerCase())) return false;
-
       const matchesSearch =
         searchQuery.trim() === "" ||
         repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,7 +67,7 @@ export function GitHubSection() {
 
       return matchesSearch && matchesLang;
     });
-  }, [repos, searchQuery, selectedLanguage, EXCLUDED_REPOS]);
+  }, [repos, searchQuery, selectedLanguage]);
 
   return (
     <section id="github" className="py-20 md:py-28 border-b border-[#181d28] bg-[#08090c]">

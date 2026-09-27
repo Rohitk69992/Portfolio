@@ -11,6 +11,11 @@ export interface FetchReposResult {
   lastUpdated: string;
 }
 
+// Fallback repositories with exact exclusion for "Portfolio"
+const safeFallbackRepositories: GitHubRepo[] = FALLBACK_REPOSITORIES.filter(
+  (repo) => repo.name !== "Portfolio"
+);
+
 export async function getGitHubRepositories(): Promise<FetchReposResult> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github.v3+json",
@@ -33,9 +38,9 @@ export async function getGitHubRepositories(): Promise<FetchReposResult> {
         `[GitHub API Warning] Status: ${response.status} ${response.statusText}. Using fallback snapshot.`
       );
       return {
-        repos: FALLBACK_REPOSITORIES,
+        repos: safeFallbackRepositories,
         source: "fallback",
-        totalCount: FALLBACK_REPOSITORIES.length,
+        totalCount: safeFallbackRepositories.length,
         lastUpdated: new Date().toISOString(),
       };
     }
@@ -45,20 +50,16 @@ export async function getGitHubRepositories(): Promise<FetchReposResult> {
     if (!Array.isArray(data)) {
       console.warn("[GitHub API Warning] Response was not an array. Using fallback snapshot.");
       return {
-        repos: FALLBACK_REPOSITORIES,
+        repos: safeFallbackRepositories,
         source: "fallback",
-        totalCount: FALLBACK_REPOSITORIES.length,
+        totalCount: safeFallbackRepositories.length,
         lastUpdated: new Date().toISOString(),
       };
     }
 
-    // Excluded repositories (such as the portfolio meta-repository itself)
-    const EXCLUDED_REPO_NAMES = new Set(["portfolio", "rohit-portfolio"]);
-
-    // Normalize and filter
+    // Normalize and exclude repository where repo.name === "Portfolio"
     const normalized: GitHubRepo[] = data
       .filter((repo): repo is Record<string, unknown> => typeof repo === "object" && repo !== null)
-      .filter((item) => !EXCLUDED_REPO_NAMES.has(String(item.name || "").toLowerCase()))
       .map((item) => ({
         id: Number(item.id) || 0,
         name: String(item.name || "unnamed-repo"),
@@ -76,10 +77,11 @@ export async function getGitHubRepositories(): Promise<FetchReposResult> {
         archived: Boolean(item.archived),
         default_branch: String(item.default_branch || "main"),
       }))
+      .filter((repo) => repo.name !== "Portfolio")
       .sort((a, b) => new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime());
 
     return {
-      repos: normalized.length > 0 ? normalized : FALLBACK_REPOSITORIES,
+      repos: normalized.length > 0 ? normalized : safeFallbackRepositories,
       source: "live",
       totalCount: normalized.length,
       lastUpdated: new Date().toISOString(),
@@ -87,9 +89,9 @@ export async function getGitHubRepositories(): Promise<FetchReposResult> {
   } catch (error) {
     console.error("[GitHub API Error] Failed to fetch repositories:", error);
     return {
-      repos: FALLBACK_REPOSITORIES,
+      repos: safeFallbackRepositories,
       source: "fallback",
-      totalCount: FALLBACK_REPOSITORIES.length,
+      totalCount: safeFallbackRepositories.length,
       lastUpdated: new Date().toISOString(),
     };
   }
