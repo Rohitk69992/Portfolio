@@ -164,8 +164,8 @@ export function ContactSection() {
                 <div className="mb-6 p-4 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs flex items-start space-x-2.5">
                   <CheckCircle2 className="w-4 h-4 mt-0.5 text-emerald-400 shrink-0" />
                   <div>
-                    <span className="font-semibold block mb-0.5">Message Received</span>
-                    Thank you. Your message has been safely logged. Rohit will review it promptly.
+                    <span className="font-semibold block mb-0.5">Message Sent</span>
+                    Your message has been sent successfully. Thank you for reaching out.
                   </div>
                 </div>
               )}
