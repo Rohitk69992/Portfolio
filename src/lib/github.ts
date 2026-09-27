@@ -52,9 +52,13 @@ export async function getGitHubRepositories(): Promise<FetchReposResult> {
       };
     }
 
+    // Excluded repositories (such as the portfolio meta-repository itself)
+    const EXCLUDED_REPO_NAMES = new Set(["portfolio", "rohit-portfolio"]);
+
     // Normalize and filter
     const normalized: GitHubRepo[] = data
       .filter((repo): repo is Record<string, unknown> => typeof repo === "object" && repo !== null)
+      .filter((item) => !EXCLUDED_REPO_NAMES.has(String(item.name || "").toLowerCase()))
       .map((item) => ({
         id: Number(item.id) || 0,
         name: String(item.name || "unnamed-repo"),
