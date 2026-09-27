@@ -72,12 +72,6 @@ export function SkillsSection() {
                   ))}
                 </div>
               </div>
-
-              {/* Card Footer */}
-              <div className="mt-4 pt-3 border-t border-[#161d2a] flex items-center justify-between text-[10px] font-mono text-slate-500">
-                <span>Verified in code</span>
-                <span className="text-accent-cyan">Active</span>
-              </div>
             </div>
           ))}
         </div>
