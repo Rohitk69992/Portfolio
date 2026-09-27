@@ -14,14 +14,10 @@ import {
   Calendar,
   Layers,
   Search,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
 } from "lucide-react";
 
 export function GitHubSection() {
   const [repos, setRepos] = useState<GitHubRepo[]>(FALLBACK_REPOSITORIES);
-  const [source, setSource] = useState<"live" | "fallback">("fallback");
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
@@ -35,7 +31,6 @@ export function GitHubSection() {
           const json = await res.json();
           if (json.success && Array.isArray(json.data) && json.data.length > 0) {
             setRepos(json.data);
-            setSource(json.source || "live");
             return;
           }
         }
@@ -79,51 +74,14 @@ export function GitHubSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-6 border-b border-[#1b212e] gap-4">
-          <div>
-            <div className="flex items-center space-x-2 font-mono text-xs text-accent-cyan uppercase tracking-wider mb-2">
-              <Github className="w-3.5 h-3.5" />
-              <span>Section 04 &middot; Source Repositories</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              Open Source & GitHub Work
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-              Dynamically fetched from the GitHub REST API for profile{" "}
-              <a
-                href={PROFILE.github.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cyan-400 underline font-mono"
-              >
-                @{PROFILE.github.username}
-              </a>
-              . Displays authentic repository metadata, languages, and commit activities.
-            </p>
+        <div className="mb-10 pb-6 border-b border-[#1b212e]">
+          <div className="flex items-center space-x-2 font-mono text-xs text-accent-cyan uppercase tracking-wider mb-2">
+            <Github className="w-3.5 h-3.5" />
+            <span>Section 04 &middot; Source Repositories</span>
           </div>
-
-          {/* Source Status Indicator */}
-          <div className="flex items-center space-x-2 font-mono text-xs">
-            <span
-              className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full border ${
-                source === "live"
-                  ? "bg-emerald-950/40 border-emerald-800/50 text-emerald-400"
-                  : "bg-amber-950/40 border-amber-800/50 text-amber-300"
-              }`}
-            >
-              {source === "live" ? (
-                <>
-                  <CheckCircle2 className="w-3 h-3" />
-                  <span>GitHub REST API: Live Connected</span>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-3 h-3" />
-                  <span>Cached Repository Snapshot</span>
-                </>
-              )}
-            </span>
-          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            Open Source & GitHub Work
+          </h2>
         </div>
 
         {/* Filter & Search Bar */}
