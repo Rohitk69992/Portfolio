@@ -17,7 +17,9 @@ import {
 } from "lucide-react";
 
 export function GitHubSection() {
-  const [repos, setRepos] = useState<GitHubRepo[]>(FALLBACK_REPOSITORIES);
+  const [repos, setRepos] = useState<GitHubRepo[]>(
+    FALLBACK_REPOSITORIES.filter((repo) => repo.name !== "Portfolio")
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
@@ -26,11 +28,11 @@ export function GitHubSection() {
     async function loadRepos() {
       try {
         setLoading(true);
-        const res = await fetch("/api/github");
+        const res = await fetch("/api/github", { cache: "no-store" });
         if (res.ok) {
           const json = await res.json();
           if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-            setRepos(json.data);
+            setRepos(json.data.filter((repo: GitHubRepo) => repo.name !== "Portfolio"));
             return;
           }
         }
@@ -47,26 +49,30 @@ export function GitHubSection() {
   // Filter languages
   const availableLanguages = useMemo(() => {
     const langs = new Set<string>();
-    repos.forEach((r) => {
-      if (r.language) langs.add(r.language);
-    });
+    repos
+      .filter((repo) => repo.name !== "Portfolio")
+      .forEach((r) => {
+        if (r.language) langs.add(r.language);
+      });
     return ["All", ...Array.from(langs)];
   }, [repos]);
 
-  // Filter repos based on search and language
+  // Filter repos based on search and language (ensures "Portfolio" is removed before rendering)
   const filteredRepos = useMemo(() => {
-    return repos.filter((repo) => {
-      const matchesSearch =
-        searchQuery.trim() === "" ||
-        repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (repo.description && repo.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        repo.topics.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+    return repos
+      .filter((repo) => repo.name !== "Portfolio")
+      .filter((repo) => {
+        const matchesSearch =
+          searchQuery.trim() === "" ||
+          repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (repo.description && repo.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          repo.topics.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesLang =
-        selectedLanguage === "All" || repo.language === selectedLanguage;
+        const matchesLang =
+          selectedLanguage === "All" || repo.language === selectedLanguage;
 
-      return matchesSearch && matchesLang;
-    });
+        return matchesSearch && matchesLang;
+      });
   }, [repos, searchQuery, selectedLanguage]);
 
   return (

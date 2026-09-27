@@ -6,13 +6,21 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const result = await getGitHubRepositories();
-    return NextResponse.json({
-      success: true,
-      data: result.repos,
-      source: result.source,
-      totalCount: result.totalCount,
-      lastUpdated: result.lastUpdated,
-    });
+    const repos = result.repos.filter((repo) => repo.name !== "Portfolio");
+    return NextResponse.json(
+      {
+        success: true,
+        data: repos,
+        source: result.source,
+        totalCount: repos.length,
+        lastUpdated: result.lastUpdated,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
   } catch {
     return NextResponse.json(
       {
